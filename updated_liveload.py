@@ -45,6 +45,24 @@ def live_load_widget(floor_count):
 
     return live_loads
 
+def calculate_dead_load_with_live_load(ifc_file, live_loads):
+    model = ifcopenshell.open(ifc_file)
+
+    total_dead_load = 0.0
+    total_live_load = 0.0
+
+    for element in model.by_type('IfcElementQuantity'):
+        for quantity in element.Quantities:
+            if quantity.is_a('IfcQuantityWeight'):
+                if 'Dead Load' in quantity.Name or 'DeadLoad' in quantity.Name or 'Gross Weight' in quantity.Name or 'GrossWeight' in quantity.Name:
+                    total_dead_load += quantity.WeightValue
+
+    for floor, load in live_loads.items():
+        area_load = load['area_load']
+        if area_load:
+            total_live_load += area_load * load['percentage_load'] / 100
+
+    return total_dead_load, total_live_load
 
 def explore_ifc_properties(ifc_path):
     import ifcopenshell
@@ -491,7 +509,7 @@ def calculate_ice_load(roof_area, ice_load_per_unit_area):
     return round(total_ice_load, 2)
 
 
-def create_Aux_pdf(element_counts, output_path, ifc_path, floor_count, forces, moments, perimeter, roof_uplift, roof_downpressure, wind_force, wall_height, roof_perimeter, areas, wind_loads, dead_load, total_column_weight, total_beam_weight, total_snow_load, total_ice_load):
+def create_Aux_pdf(element_counts, output_path, ifc_path, floor_count, forces, moments, perimeter, roof_uplift, roof_downpressure, wind_force, wall_height, roof_perimeter, areas, wind_loads, dead_load, total_column_weight, total_beam_weight, total_snow_load, total_ice_load, live_loads):
     pdf = FPDF()
     multi_story_msg = "The building is a single story."
     if floor_count > 1:
@@ -539,6 +557,10 @@ def create_Aux_pdf(element_counts, output_path, ifc_path, floor_count, forces, m
 
     pdf.cell(200, 10, txt="Ice Load Calculation Results:", ln=True)
     pdf.cell(200, 10, txt=f"Total Ice Load: {total_ice_load} lbs", ln=True)
+    
+    pdf.cell(200, 10, txt="Live Loads:", ln=True)
+    for load_info in live_loads:
+        pdf.cell(200, 10, txt=f"Floor {load_info['floor']} - Percentage Load: {load_info['percentage_load']}%, Area Load: {load_info['area_load']} sq. feet", ln=True)
 
     pdf.output(output_path)
 
@@ -602,7 +624,7 @@ def on_drop(event):
     
     # Calculate beam and column weights
     total_beam_weight, total_column_weight = calculate_beam_column_weight(ifc_file_path)
-    create_Aux_pdf(element_counts, Aux_output_path, ifc_file_path, floor_count, forces, moments, perimeter, roof_uplift, roof_downpressure, wind_force, wall_height, roof_perimeter, areas, wind_loads, dead_load, total_column_weight, total_beam_weight, total_snow_load, ice_load_total)
+    create_Aux_pdf(element_counts, Aux_output_path, ifc_file_path, floor_count, forces, moments, perimeter, roof_uplift, roof_downpressure, wind_force, wall_height, roof_perimeter, areas, wind_loads, dead_load, total_column_weight, total_beam_weight, total_snow_load, ice_load_total, live_loads)
     
     section_types = extract_section_types(ifc_file_path)
     

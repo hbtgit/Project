@@ -12,8 +12,51 @@ from fpdf import FPDF
 import tkinter as tk
 from tkinter import simpledialog
 
-# Function to collect live load data
-def live_load_widget(floor_count):
+## Function to collect live load data
+# def live_load_widget(floor_count):
+#     live_loads = []
+
+#     # Create the main window
+#     root = tk.Tk()
+#     root.withdraw()  # Hide the main window
+
+#     # Loop through each floor and get user input for live loads
+#     for floor in range(1, floor_count + 1):
+#         load_info = {}
+#         load_info['floor'] = floor
+        
+#         # Prompt for percentage load type
+#         load_info['percentage_load'] = simpledialog.askfloat(
+#             f"Floor {floor}",
+#             f"Enter the live load as a percentage for floor {floor}:"
+#         )
+
+#         # Prompt for area load type
+#         load_info['area_load'] = simpledialog.askfloat(
+#             f"Floor {floor}",
+#             f"Enter the live load as an area (in square feet) for floor {floor}:"
+#         )
+
+#         live_loads.append(load_info)
+
+#     # Destroy the main window after getting inputs
+#     root.destroy()
+
+#     return live_loads
+def live_load_widget(length, width, occupancy_type, importance_factor,floor_count
+                     ):
+    """
+    Calculates the live loads for a given building area.
+
+    Parameters:
+    length (float): The length of the building area in meters.
+    width (float): The width of the building area in meters.
+    occupancy_type (str): The type of occupancy for the building area.
+    importance_factor (float): The importance factor for the building area.
+
+    Returns:
+    float: The calculated live load in kN/m^2.
+    """
     live_loads = []
 
     # Create the main window
@@ -41,8 +84,27 @@ def live_load_widget(floor_count):
 
     # Destroy the main window after getting inputs
     root.destroy()
+    live_load = calculate_live_loads(length, width, occupancy_type, importance_factor)
+    return live_load
 
-    return live_loads
+def calculate_live_loads(length, width, occupancy_type, importance_factor):
+    """
+    Calculates the live loads for a given building area.
+
+    Parameters:
+    length (float): The length of the building area in meters.
+    width (float): The width of the building area in meters.
+    occupancy_type (str): The type of occupancy for the building area.
+    importance_factor (float): The importance factor for the building area.
+
+    Returns:
+    float: The calculated live load in kN/m^2.
+    """
+    # Implement the live load calculation logic here
+    # Based on the provided parameters and relevant standards/regulations
+    live_load = 5.0  # Example calculation
+    return live_load
+
 
 # Function to explore IFC properties (remains unchanged)
 def explore_ifc_properties(ifc_path):
